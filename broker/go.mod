@@ -1,4 +1,4 @@
-module agent-broker
+module broker
 
 go 1.24.2
 
