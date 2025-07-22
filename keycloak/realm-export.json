@@ -1,0 +1,58 @@
+{
+  "realm": "agent-identity-poc",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "agent-identity-cli",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "redirectUris": ["*"]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "agent_creator",
+        "description": "Can register and delegate to agents"
+      },
+      {
+        "name": "agent_executor",
+        "description": "Can act on behalf of delegated tasks"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "firstName": "Alice",
+      "lastName": "Agent",
+      "email": "alice@example.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["agent_creator"]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "firstName": "Bob",
+      "lastName": "Builder",
+      "email": "bob@example.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["agent_executor"]
+    }
+  ]
+}
