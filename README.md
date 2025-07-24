@@ -1,6 +1,6 @@
 # Agent Identity Prototype
 
-This project is an architecture and working prototype for secure agent identity, delegation, and credential issuance using modern decentralized identity standards.
+This project demonstrates secure agent identity creation and delegation using Go, Keycloak and simple DID/VC utilities.
 
 ## Core Capabilities
 - Agent registration via authenticated user
@@ -12,22 +12,20 @@ This project is an architecture and working prototype for secure agent identity,
 - Go (Broker, Agent services)
 - Keycloak (OIDC Identity Provider)
 - Docker / Docker Compose
-- DIDKit (for issuing DIDs and VCs)
-- Optionally: Reused modules from [`go-oidc4vc-demo`](https://github.com/tumy-tech-labs/go-oidc4vc-demo)
 
-## Architecture
-![Architecture](proto-docs/architecture-diagram.png)
-
-## How to Run
+## Running
 ```bash
-make init
 make docker-up
 ```
+This will start Keycloak, Redis, the delegation broker and a placeholder agent runner.
+The broker listens on `http://localhost:8081`.
 
-Then:
-
-Access Keycloak: http://localhost:8080
-Run broker: go run broker/main.go
-Use Postman to authenticate and register agents
-
-
+### Register an Agent
+`POST /register-agent` with a Bearer token obtained from Keycloak and JSON body:
+```json
+{
+  "role": "data-fetcher",
+  "token_ttl": 3600
+}
+```
+On success the broker returns the generated DID and a signed delegation credential.
