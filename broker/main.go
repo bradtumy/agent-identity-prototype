@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"agent-broker/handlers"
+	"github.com/bradtumy/agent-identity-poc/broker/handlers" // 👈 correct import path
 
 	"github.com/gorilla/mux"
 )
