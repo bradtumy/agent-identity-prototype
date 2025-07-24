@@ -25,7 +25,8 @@ services:
 
   broker:
     build:
-      context: ./broker
+      context: .
+      dockerfile: broker/Dockerfile
     container_name: broker
     depends_on:
       - keycloak
@@ -41,7 +42,8 @@ services:
 
   agent_runner:
     build:
-      context: ./agent_runner
+      context: .
+      dockerfile: agent_runner/Dockerfile
     container_name: agent_runner
     depends_on:
       - broker
