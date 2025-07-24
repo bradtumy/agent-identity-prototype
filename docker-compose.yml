@@ -23,4 +23,26 @@ services:
     ports:
       - "6379:6379"
 
+  broker:
+    build:
+      context: ./broker
+    container_name: broker
+    depends_on:
+      - keycloak
+    environment:
+      BROKER_PORT: "8081"
+      OIDC_ISSUER: "http://keycloak:8080/realms/agent-identity-poc"
+      BROKER_SIGNING_SECRET: "mysecret"
+      STORAGE_PATH: "/data/agents.json"
+    volumes:
+      - ./data:/data
+    ports:
+      - "8081:8081"
 
+  agent_runner:
+    build:
+      context: ./agent_runner
+    container_name: agent_runner
+    depends_on:
+      - broker
+    command: ["/usr/local/bin/agent_runner"]
