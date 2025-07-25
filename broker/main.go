@@ -51,16 +51,15 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-  
+
 	r.MethodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	})
 
 	r.Handle("/register-agent", auth.Middleware(handlers.RegisterAgentHandler(store, issuer, signingSecret))).Methods(http.MethodPost)
 	r.Handle("/delegate", auth.Middleware(handlers.DelegateHandler(issuer, privKey))).Methods(http.MethodPost)
+	r.Handle("/execute", handlers.ExecuteHandler(signingSecret)).Methods(http.MethodPost)
 
-	port := getenv("BROKER_PORT", "8081")
-  
 	log.Printf("Delegation Broker running on port %s...\n", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatalf("Server failed: %v", err)
