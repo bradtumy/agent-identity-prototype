@@ -1,3 +1,5 @@
 .env
 bin/
 data/*.json
+docker-compose.yml.bak
+init-scaffold.sh
