@@ -96,11 +96,11 @@ If not provided, a new key is generated at startup.
 
 ## Keycloak Configuration
 
-Import the provided realm export at `keycloak/agent-realm-export.json` when starting Keycloak.
-You can either copy it into the container and pass `--import-realm` on startup,
-or use the admin console to select **Add realm -> Import** and upload the file.
-
-After the realm is loaded, the client `agent-identity-cli` has *Direct Access Grants Enabled*.
+When running `make docker-up` the Keycloak container automatically imports the
+realm definition from `keycloak/realm-export.json`. This file enables *Direct
+Access Grants* for the `agent-identity-cli` client and adds an audience mapper
+so issued tokens contain the `aud` claim. If you start Keycloak manually,
+import the same file using `--import-realm` or through the admin console.
 You can verify this by requesting a token using the password grant:
 
 ```bash
