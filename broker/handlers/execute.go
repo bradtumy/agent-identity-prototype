@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bradtumy/agent-identity-poc/internal/audit"
+	"github.com/bradtumy/agent-identity-poc/internal/policy"
 	"github.com/bradtumy/agent-identity-poc/internal/vc"
 )
 
@@ -59,10 +60,18 @@ func ExecuteHandler(signingSecret []byte) http.HandlerFunc {
 
 		meta := cred.CredentialSubject.Metadata
 		role, roleOK := meta["role"].(string)
-		if !roleOK || role != "data-fetcher" {
+		if !roleOK {
 			subj := cred.CredentialSubject.ID
 			audit.LogAction("execute", subj, false)
-			http.Error(w, "unauthorized role", http.StatusForbidden)
+			http.Error(w, "missing role", http.StatusForbidden)
+			return
+		}
+
+		action := req.Task.Action
+		if err := policy.ValidatePolicy(action, role); err != nil {
+			subj := cred.CredentialSubject.ID
+			audit.LogAction("execute", subj, false)
+			http.Error(w, "policy check failed: "+err.Error(), http.StatusForbidden)
 			return
 		}
 
