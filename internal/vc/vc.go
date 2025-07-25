@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -40,4 +41,22 @@ func IssueDelegation(issuer, subjectDID string, metadata map[string]interface{},
 	cred.Proof = base64.StdEncoding.EncodeToString(mac.Sum(nil))
 
 	return cred, nil
+}
+
+// Verify checks the credential proof using the signing secret.
+func Verify(cred *Credential, secret []byte) error {
+	copyCred := *cred
+	proof := copyCred.Proof
+	copyCred.Proof = ""
+	payload, err := json.Marshal(copyCred)
+	if err != nil {
+		return err
+	}
+	mac := hmac.New(sha256.New, secret)
+	mac.Write(payload)
+	expected := base64.StdEncoding.EncodeToString(mac.Sum(nil))
+	if !hmac.Equal([]byte(expected), []byte(proof)) {
+		return fmt.Errorf("invalid credential proof")
+	}
+	return nil
 }
