@@ -86,8 +86,9 @@ func ExecuteHandler(signingSecret []byte, logger *executionlog.Logger) http.Hand
 			return
 		}
 
-		if err := vc.CheckTTL(&cred); err != nil {
+		if err := vc.ValidateTTL(&cred); err != nil {
 			subj := cred.CredentialSubject.ID
+			log.Printf("token TTL validation failed for %s: %v", subj, err)
 			audit.LogAction("execute", subj, false)
 			entry.Status = "failure"
 			entry.Message = "expired credential"
@@ -96,7 +97,12 @@ func ExecuteHandler(signingSecret []byte, logger *executionlog.Logger) http.Hand
 					log.Printf("execution log error: %v", err)
 				}
 			}
-			http.Error(w, "expired credential", http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error":   "expired_token",
+				"message": "The delegation token has expired.",
+			})
 			return
 		}
 
