@@ -155,3 +155,15 @@ Decoding the `access_token` should show the audience claim injected by the proto
 
 This configuration is required so the broker and runner components can validate tokens issued to the CLI.
 
+## Credential Trust Model
+
+The `/execute` endpoint now enforces:
+
+- ✅ Signature validation via `credential.proof` (HMAC for now)
+- ✅ Trusted issuer check against known realm URL(s)
+- ✅ TTL enforcement based on `issuanceDate` + `token_ttl`
+
+If a credential fails any check, the server responds with 401 Unauthorized.
+
+These settings will evolve to support DID + VC chains in future phases.
+
