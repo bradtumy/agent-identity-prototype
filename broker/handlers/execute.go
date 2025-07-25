@@ -30,12 +30,6 @@ func ExecuteHandler(signingSecret []byte) http.HandlerFunc {
 			return
 		}
 
-		cred := req.Credential
-
-		if err := vc.Verify(&cred, signingSecret); err != nil {
-			subj, _ := cred.CredentialSubject["id"].(string)
-			audit.LogAction("execute", subj, false)
-      
 		var cred vc.Credential
 		if err := json.Unmarshal([]byte(req.Credential), &cred); err != nil {
 			http.Error(w, "invalid credential", http.StatusBadRequest)
@@ -44,8 +38,7 @@ func ExecuteHandler(signingSecret []byte) http.HandlerFunc {
 
 		if err := vc.Verify(&cred, signingSecret); err != nil {
 			subj, _ := cred.CredentialSubject["id"].(string)
-			//audit.LogAction("execute", subj, false)
-			audit.LogAction("execute", cred.CredentialSubject["id"].(string), false)
+			audit.LogAction("execute", subj, false)
 			http.Error(w, "invalid credential", http.StatusForbidden)
 			return
 		}
@@ -62,7 +55,6 @@ func ExecuteHandler(signingSecret []byte) http.HandlerFunc {
 			http.Error(w, "invalid issuance date", http.StatusForbidden)
 			return
 		}
-      
 		if !ttlOK || time.Now().After(issued.Add(time.Duration(ttlFloat)*time.Second)) {
 			subj, _ := cred.CredentialSubject["id"].(string)
 			audit.LogAction("execute", subj, false)
@@ -72,15 +64,6 @@ func ExecuteHandler(signingSecret []byte) http.HandlerFunc {
 		if !roleOK || role != "data-fetcher" {
 			subj, _ := cred.CredentialSubject["id"].(string)
 			audit.LogAction("execute", subj, false)
-
-		if time.Now().After(issued.Add(time.Duration(ttl) * time.Second)) {
-			audit.LogAction("execute", cred.CredentialSubject["id"].(string), false)
-			http.Error(w, "credential expired", http.StatusForbidden)
-			return
-		}
-		if role != "data-fetcher" {
-			audit.LogAction("execute", cred.CredentialSubject["id"].(string), false)
-
 			http.Error(w, "unauthorized role", http.StatusForbidden)
 			return
 		}
@@ -88,9 +71,6 @@ func ExecuteHandler(signingSecret []byte) http.HandlerFunc {
 		// Log success
 		subj, _ := cred.CredentialSubject["id"].(string)
 		audit.LogAction("execute", subj, true)
-
-//		audit.LogAction("execute", subj, true)
-		audit.LogAction("execute", cred.CredentialSubject["id"].(string), true)
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"result": "ok"})
