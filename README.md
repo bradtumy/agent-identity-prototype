@@ -115,8 +115,11 @@ client will work.
 }
 ```
 
+Use the credential returned by `/register-agent` directly in the request body.
+=======
 Use the credential returned by `/register-agent`. Postman may require escaping
 quotes or using environment variables to include the full JSON string.
+
 Sending the request will return a stubbed result when the credential is valid:
 
 ```json
