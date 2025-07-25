@@ -101,11 +101,11 @@ client will work.
 
 1. Create a new `POST` request to `http://localhost:8081/execute`.
 2. On the **Body** tab choose **raw** and select **JSON** format.
-3. Provide the payload containing the credential object and task details:
+3. Provide the payload containing the credential string and task details:
 
 ```json
 {
-  "credential": {<delegation credential>},
+  "credential": "<credential JSON string>",
   "task": {
     "action": "fetch_data",
     "params": {
@@ -116,6 +116,10 @@ client will work.
 ```
 
 Use the credential returned by `/register-agent` directly in the request body.
+=======
+Use the credential returned by `/register-agent`. Postman may require escaping
+quotes or using environment variables to include the full JSON string.
+
 Sending the request will return a stubbed result when the credential is valid:
 
 ```json
