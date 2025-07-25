@@ -14,7 +14,7 @@ type Auth struct {
 }
 
 // NewAuth creates the middleware with given issuer URL.
-func NewAuth(ctx context.Context, issuer string) (*Auth, error) {
+func NewAuth(ctx context.Context, issuer string, clientID string) (*Auth, error) {
 	provider, err := oidc.NewProvider(ctx, issuer)
 	if err != nil {
 		return nil, err
