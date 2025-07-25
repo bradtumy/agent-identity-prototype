@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/bradtumy/agent-identity-poc/internal/audit"
 	"github.com/bradtumy/agent-identity-poc/internal/vc"
@@ -24,6 +23,9 @@ type TaskRequest struct {
 
 // ExecuteHandler handles POST /execute requests
 func ExecuteHandler(signingSecret []byte) http.HandlerFunc {
+	// trusted issuer list and shared secret used for VC validation
+	trustedIssuers := []string{"http://keycloak:8080/realms/agent-identity-poc"}
+	sharedSecret := []byte("mysecret")
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req ExecuteRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -34,27 +36,29 @@ func ExecuteHandler(signingSecret []byte) http.HandlerFunc {
 
 		cred := req.Credential
 
-		if err := vc.Verify(&cred, signingSecret); err != nil {
+		if err := vc.VerifySignature(&cred, sharedSecret); err != nil {
 			subj := cred.CredentialSubject.ID
 			audit.LogAction("execute", subj, false)
-			http.Error(w, "invalid credential", http.StatusForbidden)
+			http.Error(w, "invalid credential signature", http.StatusUnauthorized)
+			return
+		}
+
+		if err := vc.CheckTrustedIssuer(&cred, trustedIssuers); err != nil {
+			subj := cred.CredentialSubject.ID
+			audit.LogAction("execute", subj, false)
+			http.Error(w, "untrusted issuer", http.StatusUnauthorized)
+			return
+		}
+
+		if err := vc.CheckTTL(&cred); err != nil {
+			subj := cred.CredentialSubject.ID
+			audit.LogAction("execute", subj, false)
+			http.Error(w, "expired credential", http.StatusUnauthorized)
 			return
 		}
 
 		meta := cred.CredentialSubject.Metadata
 		role, roleOK := meta["role"].(string)
-		ttlFloat, ttlOK := meta["token_ttl"].(float64)
-		issued, err := time.Parse(time.RFC3339, cred.IssuanceDate)
-		if err != nil {
-			http.Error(w, "invalid issuance date", http.StatusForbidden)
-			return
-		}
-		if !ttlOK || time.Now().After(issued.Add(time.Duration(ttlFloat)*time.Second)) {
-			subj := cred.CredentialSubject.ID
-			audit.LogAction("execute", subj, false)
-			http.Error(w, "credential expired", http.StatusForbidden)
-			return
-		}
 		if !roleOK || role != "data-fetcher" {
 			subj := cred.CredentialSubject.ID
 			audit.LogAction("execute", subj, false)
