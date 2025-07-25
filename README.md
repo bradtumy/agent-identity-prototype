@@ -96,10 +96,10 @@ If not provided, a new key is generated at startup.
 ### Execute a Task
 
 The `/execute` endpoint allows an agent to perform an authorized action using
-its delegation credential. The examples below use **Postman**, but any HTTP
-client will work.
+its delegation credential. The examples below show how to call it via
+**Postman** and **curl**.
 
-1. Create a new `POST` request to `http://localhost:8081/execute`.
+1. Create a new `POST` request to `http://localhost:8081/execute` in Postman.
 2. On the **Body** tab choose **raw** and select **JSON** format.
 3. Provide the payload containing the credential string and task details:
 
@@ -117,10 +117,28 @@ client will work.
 
 Use the credential returned by `/register-agent`. Postman may require escaping quotes or using environment variables to include the full JSON string.
 
+To call the endpoint with `curl`:
+
+```bash
+curl -X POST http://localhost:8081/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "credential": "<credential JSON string>",
+    "task": {"action": "fetch_data", "params": {"url": "https://example.com/data"}}
+  }'
+```
+
 Sending the request will return a stubbed result when the credential is valid:
 
 ```json
 {"result": "ok"}
+```
+
+Each call writes a log entry to `./data/execution.log`. You should see a line
+similar to:
+
+```json
+{"timestamp":"2025-07-25T15:42:00Z","agent_did":"did:example:abc-123","role":"data-fetcher","action":"fetch_data","status":"success","message":"Fetched data from https://example.com/data"}
 ```
 
 Invalid or expired credentials receive a `403 Forbidden` response.
@@ -176,4 +194,9 @@ Before executing a task, the broker validates:
 - Role in credential metadata is authorized for the requested action
 
 If either check fails, a `403 Forbidden` is returned.
+
+## Execution Logs
+
+All agent task execution events are logged to `./data/execution.log` in JSON
+Lines format.
 

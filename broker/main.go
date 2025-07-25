@@ -12,6 +12,7 @@ import (
 
 	"github.com/bradtumy/agent-identity-poc/broker/handlers"
 	"github.com/bradtumy/agent-identity-poc/broker/middleware"
+	"github.com/bradtumy/agent-identity-poc/internal/executionlog"
 	"github.com/bradtumy/agent-identity-poc/internal/storage"
 	"github.com/gorilla/mux"
 )
@@ -36,6 +37,7 @@ func main() {
 		privKey = pk
 	}
 	storePath := getenv("STORAGE_PATH", "data/agents.json")
+	logPath := getenv("EXECUTION_LOG_PATH", "/data/execution.log")
 	port := getenv("BROKER_PORT", "8081")
 
 	log.Printf("Checking if OIDC issuer %s is ready...", issuer)
@@ -56,9 +58,11 @@ func main() {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	})
 
+	execLogger := executionlog.NewLogger(logPath)
+
 	r.Handle("/register-agent", auth.Middleware(handlers.RegisterAgentHandler(store, issuer, signingSecret))).Methods(http.MethodPost)
 	r.Handle("/delegate", auth.Middleware(handlers.DelegateHandler(issuer, privKey))).Methods(http.MethodPost)
-	r.Handle("/execute", handlers.ExecuteHandler(signingSecret)).Methods(http.MethodPost)
+	r.Handle("/execute", handlers.ExecuteHandler(signingSecret, execLogger)).Methods(http.MethodPost)
 
 	log.Printf("Delegation Broker running on port %s...\n", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
