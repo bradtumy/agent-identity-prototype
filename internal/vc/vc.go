@@ -10,13 +10,24 @@ import (
 )
 
 // Credential is a basic Verifiable Credential structure.
+
 type Credential struct {
-	Context           string                 `json:"@context"`
-	Type              []string               `json:"type"`
-	Issuer            string                 `json:"issuer"`
-	IssuanceDate      string                 `json:"issuanceDate"`
-	CredentialSubject map[string]interface{} `json:"credentialSubject"`
-	Proof             string                 `json:"proof"`
+	Context           interface{}       `json:"@context"`
+	Type              []string          `json:"type"`
+	Issuer            string            `json:"issuer"`
+	IssuanceDate      string            `json:"issuanceDate"`
+	CredentialSubject CredentialSubject `json:"credentialSubject"`
+	Proof             string            `json:"proof"`
+}
+
+type CredentialSubject struct {
+	ID       string                 `json:"id"`
+	Metadata map[string]interface{} `json:"metadata"`
+}
+
+type Task struct {
+	Action string                 `json:"action"`
+	Params map[string]interface{} `json:"params"`
 }
 
 // IssueDelegation creates and signs a simple credential asserting delegation.
@@ -26,9 +37,9 @@ func IssueDelegation(issuer, subjectDID string, metadata map[string]interface{},
 		Type:         []string{"VerifiableCredential", "AgentDelegation"},
 		Issuer:       issuer,
 		IssuanceDate: time.Now().UTC().Format(time.RFC3339),
-		CredentialSubject: map[string]interface{}{
-			"id":       subjectDID,
-			"metadata": metadata,
+		CredentialSubject: CredentialSubject{
+			ID:       subjectDID,
+			Metadata: metadata,
 		},
 	}
 
