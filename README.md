@@ -69,5 +69,28 @@ The broker listens on `http://localhost:8081`.
        },
        "proof": "/rL2t/Ch9aklOZaV5fuamV/RwEfiuO/EfW5rBlNiL6k="
      }
-   }
-   ```
+  }
+  ```
+
+### Issue a Delegation Token
+
+Use the `/delegate` endpoint to generate a signed delegation token for an agent.
+This route **only accepts POST requests**.
+
+```bash
+curl -X POST http://localhost:8081/delegate \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "delegatee_did": "did:example:123",
+    "role": "data-fetcher",
+    "token_ttl": 3600
+  }'
+```
+
+The response contains the signed token which includes the delegatee DID,
+your role metadata and a proof signature.
+
+The broker signs tokens using an Ed25519 private key. You may supply your own
+key via the `BROKER_ED25519_PRIVATE_KEY` environment variable (base64 encoded).
+If not provided, a new key is generated at startup.
