@@ -93,6 +93,37 @@ The broker signs tokens using an Ed25519 private key. You may supply your own
 key via the `BROKER_ED25519_PRIVATE_KEY` environment variable (base64 encoded).
 If not provided, a new key is generated at startup.
 
+### Execute a Task
+
+The `/execute` endpoint allows an agent to perform an authorized action using
+its delegation credential. The examples below use **Postman**, but any HTTP
+client will work.
+
+1. Create a new `POST` request to `http://localhost:8081/execute`.
+2. On the **Body** tab choose **raw** and select **JSON** format.
+3. Provide the payload containing the credential object and task details:
+
+```json
+{
+  "credential": {<delegation credential>},
+  "task": {
+    "action": "fetch_data",
+    "params": {
+      "url": "https://example.com/data"
+    }
+  }
+}
+```
+
+Use the credential returned by `/register-agent` directly in the request body.
+Sending the request will return a stubbed result when the credential is valid:
+
+```json
+{"result": "ok"}
+```
+
+Invalid or expired credentials receive a `403 Forbidden` response.
+
 
 ## Keycloak Configuration
 
