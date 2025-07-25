@@ -1,0 +1,74 @@
+{
+  "realm": "agent-identity-poc",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "agent-identity-cli",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "redirectUris": ["*"],
+      "directAccessGrantsEnabled": true,
+      "protocolMappers": [
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "client_id",
+            "claim.name": "aud",
+            "jsonType.label": "String",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "agent_creator",
+        "description": "Can register and delegate to agents"
+      },
+      {
+        "name": "agent_executor",
+        "description": "Can act on behalf of delegated tasks"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "firstName": "Alice",
+      "lastName": "Agent",
+      "email": "alice@example.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["agent_creator"]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "firstName": "Bob",
+      "lastName": "Builder",
+      "email": "bob@example.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["agent_executor"]
+    }
+  ]
+}
