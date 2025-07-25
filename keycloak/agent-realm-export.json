@@ -8,17 +8,18 @@
       "publicClient": true,
       "redirectUris": ["*"],
       "directAccessGrantsEnabled": true,
+      "attributes": {
+        "post.logout.redirect.uris": "*"
+      },
       "protocolMappers": [
         {
           "name": "audience",
           "protocol": "openid-connect",
-          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "user.session.note": "client_id",
-            "claim.name": "aud",
-            "jsonType.label": "String",
-            "id.token.claim": "false",
+            "included.client.audience": "agent-identity-cli",
+            "id.token.claim": "true",
             "access.token.claim": "true"
           }
         }
