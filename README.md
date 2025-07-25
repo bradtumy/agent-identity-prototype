@@ -167,3 +167,13 @@ If a credential fails any check, the server responds with 401 Unauthorized.
 
 These settings will evolve to support DID + VC chains in future phases.
 
+
+## Agent Execution Policy Engine
+
+Before executing a task, the broker validates:
+
+- Action is in the allowed list (`fetch_data`, `transform`, `notify`)
+- Role in credential metadata is authorized for the requested action
+
+If either check fails, a `403 Forbidden` is returned.
+
