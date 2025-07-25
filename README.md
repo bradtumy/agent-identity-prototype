@@ -69,8 +69,6 @@ The broker listens on `http://localhost:8081`.
        },
        "proof": "/rL2t/Ch9aklOZaV5fuamV/RwEfiuO/EfW5rBlNiL6k="
      }
-  }
-  ```
 
 ### Issue a Delegation Token
 
@@ -94,3 +92,34 @@ your role metadata and a proof signature.
 The broker signs tokens using an Ed25519 private key. You may supply your own
 key via the `BROKER_ED25519_PRIVATE_KEY` environment variable (base64 encoded).
 If not provided, a new key is generated at startup.
+
+
+## Keycloak Configuration
+
+Import the provided realm export at `keycloak/agent-realm-export.json` when starting Keycloak.
+You can either copy it into the container and pass `--import-realm` on startup,
+or use the admin console to select **Add realm -> Import** and upload the file.
+
+After the realm is loaded, the client `agent-identity-cli` has *Direct Access Grants Enabled*.
+You can verify this by requesting a token using the password grant:
+
+```bash
+curl -X POST \
+  -d 'client_id=agent-identity-cli' \
+  -d 'grant_type=password' \
+  -d 'username=alice' \
+  -d 'password=password' \
+  http://localhost:8080/realms/agent-identity-poc/protocol/openid-connect/token
+```
+
+Decoding the `access_token` should show the audience claim injected by the protocol mapper:
+
+```json
+{
+  "preferred_username": "alice",
+  "aud": "agent-identity-cli"
+}
+```
+
+This configuration is required so the broker and runner components can validate tokens issued to the CLI.
+
