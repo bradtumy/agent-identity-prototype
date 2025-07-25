@@ -31,15 +31,15 @@ func TestCheckTrustedIssuer(t *testing.T) {
 	}
 }
 
-func TestCheckTTL(t *testing.T) {
+func TestValidateTTL(t *testing.T) {
 	secret := []byte("mysecret")
 	cred, _ := IssueDelegation("http://keycloak:8080/realms/agent-identity-poc", "did:example:123", map[string]interface{}{"token_ttl": 3600}, secret)
-	if err := CheckTTL(cred); err != nil {
+	if err := ValidateTTL(cred); err != nil {
 		t.Fatalf("valid ttl rejected: %v", err)
 	}
 	cred.IssuanceDate = time.Now().Add(-2 * time.Hour).Format(time.RFC3339)
 	cred.CredentialSubject.Metadata["token_ttl"] = 1
-	if err := CheckTTL(cred); err == nil {
+	if err := ValidateTTL(cred); err == nil {
 		t.Fatalf("expired ttl accepted")
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
 // VerifySignature validates the `proof` field using shared secret for now
@@ -39,25 +38,5 @@ func CheckTrustedIssuer(cred *Credential, trustedIssuers []string) error {
 
 // CheckTTL ensures the credential has not expired
 func CheckTTL(cred *Credential) error {
-	issued, err := time.Parse(time.RFC3339, cred.IssuanceDate)
-	if err != nil {
-		return err
-	}
-	ttlVal, ok := cred.CredentialSubject.Metadata["token_ttl"]
-	if !ok {
-		return fmt.Errorf("missing token_ttl")
-	}
-	var ttlSeconds float64
-	switch v := ttlVal.(type) {
-	case float64:
-		ttlSeconds = v
-	case int:
-		ttlSeconds = float64(v)
-	default:
-		return fmt.Errorf("invalid token_ttl type")
-	}
-	if time.Now().After(issued.Add(time.Duration(ttlSeconds) * time.Second)) {
-		return fmt.Errorf("credential expired")
-	}
-	return nil
+	return ValidateTTL(cred)
 }
